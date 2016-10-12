@@ -1,0 +1,109 @@
+<div class="container">
+  <div class="row">
+    <div class="col-sm-12">
+      <div class="panel-group">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h4 class="panel-title">
+              <a ng-click="isEmployeeCollapsed = !isEmployeeCollapsed">Organisation employees</a>
+            </h4>
+          </div>
+          <div uib-collapse="isEmployeeCollapsed">
+            <ul class="list-group" ng-repeat="member in org.members">
+              <li class="list-group-item">
+              <h5>{{member.name}}</h5>
+              <p>{{member.email}}</p>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel-group">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h4 class="panel-title">
+              <a ng-click="isTeamCollapsed = !isTeamCollapsed">Organisation teams</a>
+            </h4>
+          </div>
+          <div uib-collapse="isTeamCollapsed">
+            <ul class="list-group" >
+              <li class="list-group-item" ng-repeat="team in org.teams">
+                <div class="panel-group">
+                  <div class="panel panel-default">
+                    <div class="panel-heading">
+                      <div class="panel-title">
+                        <h4>
+                          <a ng-click="isTeamDetailCollapsed = !isTeamDetailCollapsed">{{team.name}}</a>
+                        </h4>
+                        <form class="form" name="form" ng-submit="org.joinCurrentTeam(form, org.org_id, team._id)" novalidate>
+                        <div class="row">
+                          <div class="form-group col-sm-9">
+                            <input type="text" name="email" class="form-control" placeholder="Enter emails here.." ng-model="org.joinTeamEmails" required>
+                          </div>
+                          <div class = "col-sm-3">
+                            <button class= "btn" type="submit">
+                              Send Invites
+                            </button>
+                          </div>
+                          </div>
+                        </form>
+                      </div>
+                    </div>
+                    <div uib-collapse="isTeamDetailCollapsed">
+                      <ul class="list-group">
+                        <li class="list-group-item" ng-repeat="teamMember in team.members">
+                          <div class ='row'>
+                            <div class = 'col-sm-9'>
+                              <h5>{{teamMember.member.name}}</h5>
+                              <p>{{teamMember.member.email}}</p>
+                            </div>
+                            <div class = 'col-sm-3'>
+                              <button ng-show='!org.isAdmin(teamMember)' ng-click='org.makeAdmin(team._id, teamMember._id)'>Make Admin</button>
+                              <p ng-show='org.isAdmin(teamMember)'>Admin</p>
+                            </div>
+                          </div>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+       <div class="panel-group">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h4 class="panel-title">
+              <a data-toggle="collapse" data-target="#collapse1">Create a team</a>
+            </h4>
+          </div>
+          <div id="collapse1" class="panel-collapse collapse in">
+            <div class="container">
+              <form class="form" name="form" ng-submit="org.sendRequest(form)" novalidate>
+
+                <div class="form-group">
+                  <label>Team name</label>
+                  <input type="text" name="email" class="form-control" ng-model="org.team" required>
+                </div>
+                <div class="form-group">
+                  <label>Emails</label>
+                  <input type="text" name="email" class="form-control" ng-model="org.emails" required>
+                </div>
+                <div>
+                  <button class="btn btn-inverse btn-lg" type="submit">
+                    Send Invites
+                  </button>
+                </div>
+              </form>
+              <h4>{{org.sent_request}}</h4>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

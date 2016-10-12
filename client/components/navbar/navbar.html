@@ -1,0 +1,63 @@
+<!-- TODO: Fix glyphicons and font awesome -->
+<div class="navbar navbar-inverse navbar-default navbar-static-top">
+  <div class="container">
+    <div class="navbar-header">
+      <button class="navbar-toggle" type="button" ng-click="$ctrl.isCollapsed = !$ctrl.isCollapsed">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a href="/" class="navbar-brand">Collaba</a>
+    </div>
+    <div uib-collapse="$ctrl.isCollapsed" class="navbar-collapse collapse" id="navbar-main">
+      <ul class="nav navbar-nav">
+        <li ng-repeat="item in $ctrl.menu" ui-sref-active="active" ng-hide="$ctrl.isAdmin()">
+          <a ui-sref="{{item.state}}">{{item.title}}</a>
+        </li>
+        <li ng-show="$ctrl.isAdmin()" ui-sref-active="active"><a ui-sref="admin">Admin</a></li>
+        <li ng-show="$ctrl.isLoggedIn() && !$ctrl.isAdmin()" ui-sref-active="active"><a ui-sref="chat">
+        Chat</a></li>
+        <li ng-show="$ctrl.isLoggedInOrg()" ui-sref-active="active"><a ui-sref="organisation">
+        Organisation</a></li>
+      </ul>
+
+      <ul class="nav navbar-nav navbar-right">
+        <li ng-hide="$ctrl.isLoggedIn() || $ctrl.isLoggedInOrg() " ui-sref-active="active" uib-dropdown>
+          <a href="#" uib-dropdown-toggle role="button" aria-haspopup="true" aria-expanded="false">Register <span class="caret"></span></a>
+          <ul class="dropdown-menu" uib-dropbown-menu>
+            <li><a ui-sref="signup">Register as User</a></li>
+            <li><a ui-sref="signupOrganisation">Register as Organisation</a></li>
+          </ul>
+        </li>
+        <li ng-hide="$ctrl.isLoggedIn() || $ctrl.isLoggedInOrg()" ui-sref-active="active" uib-dropdown>
+          <a href="#" uib-dropdown-toggle role="button" aria-haspopup="true" aria-expanded="false">Sign In <span class="caret"></span></a>
+          <ul class="dropdown-menu" uib-dropbown-menu>
+            <li><a ui-sref="login">User Login</a></li>
+            <li><a ui-sref="loginOrganisation">Organisation Login</a></li>
+          </ul>
+        </li>
+        <li ng-show="$ctrl.isLoggedIn()">
+          <p class="navbar-text">Hello {{ $ctrl.getCurrentUser().name }}</p>
+        </li>
+        <li ng-show="$ctrl.isLoggedInOrg()">
+          <p class="navbar-text">Hello {{ $ctrl.getCurrentOrg().name }}</p>
+        </li>
+        <li ng-show="$ctrl.isLoggedIn()" ui-sref-active="active">
+          <a ui-sref="settings">
+            Settings
+            <!-- <span class="glyphicon glyphicon-cog"></span> -->
+          </a>
+        </li>
+        <li ng-show="$ctrl.isLoggedInOrg()" ui-sref-active="active">
+          <a ui-sref="settingsOrganisation">
+            SettingsOrg
+            <!-- <span class="glyphicon glyphicon-cog"></span> -->
+          </a>
+        </li>
+        <li ng-show="$ctrl.isLoggedInOrg()"><a ui-sref="logoutOrganisation">LogoutOrg</a></li>
+        <li ng-show="$ctrl.isLoggedIn()"><a ui-sref="logout">Logout</a></li>
+      </ul>
+    </div>
+  </div>
+</div>

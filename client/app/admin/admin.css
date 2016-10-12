@@ -1,0 +1,19 @@
+.trash { color:rgb(209, 91, 71); }
+
+.organisation-list li {
+	display: flex;
+	border: none;
+	border-bottom: 1px lightgray solid;
+	margin-bottom: 0;
+}
+.organisation-list li:last-child {
+	border-bottom: none;
+}
+.organisation-list li .organisation-info {
+	flex-grow: 1;
+}
+.organisation-list li .button {
+	display: flex;
+	align-items: center;
+	text-decoration: none;
+}

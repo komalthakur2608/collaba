@@ -1,0 +1,29 @@
+<div class="container">
+  <div class="row">
+    <div class="col-sm-3 well">
+      <!-- <select ng-model='chatCtrl.team'>
+        <option ng-repeat="option in chatCtrl.teams" value="option.id">{{otion.name}}</option>
+      </select> -->
+      <!-- <select ng-options="team as team.name for team in chatCtrl.teams" ng-model="chatCtrl.selectedTeam" ng-change="chatCtrl.teamChange()">
+      </select>{{chatCtrl.selectedTeam.name}} -->
+      <h1>Channels</h1>
+      <div ng-repeat="channel in chatCtrl.channels">
+        <p ng-click="chatCtrl.channelClick(channel)">{{channel.name}}</p>
+      </div>
+    </div>
+    <div class="col-sm-9">
+      <div id="chat">
+        <div class="input-group">
+          <input type="text" class="form-control" placeholder="Enter message" ng-model="chatCtrl.message" />
+          <span class="input-group-btn">
+          <button class="btn btn-default" type="button" ng-click="chatCtrl.sendMessage()">Send</button>
+        </span>
+        </div>
+        <br/>
+        <ul ng-repeat='chat in chatCtrl.chatHistory' class="list-group">
+          <li class="list-group-item"><span class="well">{{chat.sender}}</span>&nbsp;<span class="message"> {{chat.message}}</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>

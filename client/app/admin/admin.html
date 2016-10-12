@@ -1,0 +1,22 @@
+<!-- TODO: Fix glyphicons and font awesome -->
+<div class="container">
+  <p>Organisation Requests</p>
+  <ul class="list-group organisation-list">
+    <li class="list-group-item" ng-repeat="organisation in admin.organisations">
+	    <div class="organisation-info">
+	        <strong>{{organisation.name}}</strong><br>
+	        <span class="text-muted">{{organisation.email}}</span>
+	    </div>
+        <a ng-click="admin.updateStatus(organisation, 'rejected')" class="btn button">
+          Reject
+          <!-- <span class="fa fa-trash fa-2x"></span> -->
+        </a>
+        <a ng-click="admin.updateStatus(organisation, 'on hold')" class="btn button">
+          Hold
+        </a>
+        <a ng-click="admin.updateStatus(organisation, 'approved')" class="btn button">
+          Approve
+        </a>
+    </li>
+  </ul>
+</div>
