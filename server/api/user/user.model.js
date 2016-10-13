@@ -31,7 +31,8 @@ var UserSchema = new Schema({
     required() {
       if(authTypes.indexOf(this.provider) === -1) {
         return true;
-      } else {        return false;
+      } else {
+        return false;
       }
     }
   },

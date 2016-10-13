@@ -4,7 +4,7 @@ mongoose.Promise = require('bluebird');
 import mongoose, {Schema} from 'mongoose';
 import User from '../user/user.model';
 import Team from '../../components/models/team.model';
-
+import Channel from '../../components/models/channel.model';
 var OrganisationSchema = new mongoose.Schema({
   name: String,
   email: {
@@ -29,6 +29,10 @@ var OrganisationSchema = new mongoose.Schema({
     type: String,
     default: 'pending'
   },
+  public:[{
+    type: Schema.Types.ObjectId,
+    ref: 'Channel'
+  }],
   salt: String
 });
 

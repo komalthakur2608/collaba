@@ -39,7 +39,7 @@
                         <form class="form" name="form" ng-submit="org.joinCurrentTeam(form, org.org_id, team._id)" novalidate>
                         <div class="row">
                           <div class="form-group col-sm-9">
-                            <input type="text" name="email" class="form-control" placeholder="Enter emails here.." ng-model="org.joinTeamEmails" required>
+                            <input type="text" name="email" class="form-control" placeholder="Enter emails here.." ng-model="org.joinTeamEmails[team._id]" required>
                           </div>
                           <div class = "col-sm-3">
                             <button class= "btn" type="submit">

@@ -7,7 +7,7 @@ import {signTokenOrg} from '../auth.service';
 var router = express.Router();
 
 router.post('/', function(req, res, next) {
-  passport.authenticate('local', function(err, organisation, info) {
+  passport.authenticate('localOrg', function(err, organisation, info) {
     var error = err || info;
     if(error) {
       return res.status(401).json(error);

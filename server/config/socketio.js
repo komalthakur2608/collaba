@@ -13,12 +13,13 @@ function onConnect(socket, socketio) {
 
   //Set the room for particular channel
   socket.on('room', data => {
+    console.log("Romm Connected:"+data);
     socket.join(data);
   });
   //send message to the people in channel
   socket.on('channel-message', data => {
-    // console.log('Socket:id' + socket.id);
-    // console.log("Data:" + data);
+    console.log('Socket:id' + socket.id);
+    console.log("Data:" + data);
     socketio.to(data.room)
       .emit('channel-message', data);
     socket.log(JSON.stringify(data, null, 2));

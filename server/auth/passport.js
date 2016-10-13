@@ -26,7 +26,7 @@ function localAuthenticate(Organisation, email, password, done) {
 }
 
 export function setup(Organisation/*, config*/) {
-  passport.use('localOrg',new LocalStrategy({
+  passport.use(new LocalStrategy({
     usernameField: 'email',
     passwordField: 'password' // this is the virtual field on the model
   }, function(email, password, done) {

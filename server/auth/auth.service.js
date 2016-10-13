@@ -4,7 +4,6 @@ import jwt from 'jsonwebtoken';
 import expressJwt from 'express-jwt';
 import compose from 'composable-middleware';
 import User from '../api/user/user.model';
-import Organisation from '../api/organisation/organisation.model';
 
 var validateJwt = expressJwt({
   secret: config.secrets.session
@@ -42,34 +41,6 @@ export function isAuthenticated() {
     });
 }
 
-export function isAuthenticatedOrg() {
-  return compose()
-    // Validate jwt
-    .use(function(req, res, next) {
-      // allow access_token to be passed through query parameter as well
-      if(req.query && req.query.hasOwnProperty('access_token')) {
-        req.headers.authorization = `Bearer ${req.query.access_token}`;
-      }
-     // IE11 forgets to set Authorization header sometimes. Pull from cookie instead.
-      if(req.query && typeof req.headers.authorization === 'undefined') {
-        req.headers.authorization = `Bearer ${req.cookies.token}`;
-      }
-      validateJwt(req, res, next);
-    })
-    // Attach user to request
-    .use(function(req, res, next) {
-      Organisation.findById(req.params.id).exec()
-        .then(org => {
-          if(!org) {
-            return res.status(401).end();
-          }
-          req.org = org;
-          next();
-        })
-        .catch(err => next(err));
-    });
-}
-
 /**
  * Checks if the user role meets the minimum requirements of the route
  */
@@ -97,13 +68,6 @@ export function signToken(id, role) {
     expiresIn: 60 * 60 * 5
   });
 }
-
-export function signTokenOrg(id, email) {
-  return jwt.sign({ _id: id, email }, config.secrets.session, {
-    expiresIn: 60 * 60 * 5
-  });
-}
-
 
 /**
  * Set token cookie directly for oAuth strategies

@@ -8,27 +8,11 @@ class _User {
   $promise = undefined;
 }
 
-class _Org {
-  _id = '';
-  name = '';
-  email = '';
-  website = '';
-  domainName = '';
-  about = '';
-  address = '';
-  phone = '';
-  members = [];
-  teams = [];
-  status = '';
-  $promise = undefined;
-}
-
 export function AuthService($location, $http, $cookies, $q, appConfig, Util, User, Organisation) {
   'ngInject';
 
   var safeCb = Util.safeCb;
   var currentUser = new _User();
-  var currentOrg = new _Org();
   var userRoles = appConfig.userRoles || [];
   /**
    * Check if userRole is >= role
@@ -75,50 +59,12 @@ export function AuthService($location, $http, $cookies, $q, appConfig, Util, Use
         });
     },
 
-    loginOrganisation({
-      email,
-      password
-    }, callback) {
-      return $http.post('/auth/local/organisation', {
-          email,
-          password
-        })
-        .then(res => {
-          $cookies.put('token', res.data.token);
-          return Organisation.get({id : res.data.org._id}).$promise.then(org =>{
-            currentOrg = org;
-            console.log(currentOrg);
-            return currentOrg;
-          });
-          
-        })
-        .then(user => {
-          console.log(currentOrg);
-          console.log(user);
-          safeCb(callback)(null, user);
-          return user;
-        })
-        .catch(err => {
-          console.log('err occured');
-          console.log(err);
-          Auth.logoutOrganisation();
-          safeCb(callback)(err.data);
-          return $q.reject(err.data);
-        });
-    },
-
     /**
      * Delete access token and user info
      */
     logout() {
-      console.log("logout called");
       $cookies.remove('token');
       currentUser = new _User();
-    },
-    logoutOrganisation() {
-      console.log("organisation logout called");
-      $cookies.remove('token');
-      currentOrg = new _Org();
     },
 
     /**
@@ -178,20 +124,6 @@ export function AuthService($location, $http, $cookies, $q, appConfig, Util, Use
         .$promise;
     },
 
-    changePasswordOrg(oldPassword, newPassword, callback) {
-      return Organisation.changePassword({
-          id: currentOrg._id
-        }, {
-          oldPassword,
-          newPassword
-        }, function () {
-          return safeCb(callback)(null);
-        }, function (err) {
-          return safeCb(callback)(err);
-        })
-        .$promise;
-    },
-
     /**
      * Gets all available info on a user
      *
@@ -220,10 +152,6 @@ export function AuthService($location, $http, $cookies, $q, appConfig, Util, Use
       return currentUser;
     },
 
-    getCurrentOrgSync() {
-      return currentOrg;
-    },
-
     /**
      * Check if a user is logged in
      *
@@ -247,10 +175,6 @@ export function AuthService($location, $http, $cookies, $q, appConfig, Util, Use
      */
     isLoggedInSync() {
       return !!_.get(currentUser, 'role');
-    },
-
-    isLoggedInOrgSync() {
-      return !!_.get(currentOrg, 'name');
     },
 
     /**

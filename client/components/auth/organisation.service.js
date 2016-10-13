@@ -24,32 +24,6 @@ export function OrganisationResource($resource) {
       params: {
         controller: 'updateStatus'
       }
-    },
-    get: {
-      method: 'GET',
-      params: {
-        id: '@id',
-        controller : 'get'
-      }
-    },
-    getOrgDetail : {
-      method: 'GET',
-      params: {
-        id: '@id',
-        controller : 'details'
-      }
-    },
-    sendRequests : {
-    method: 'POST',
-      params: {
-        controller: 'sendmails'
-      }
-    },
-    makeAdmin : {
-      method: 'POST',
-      params: {
-        controller: 'admin'
-      }
     }
   });
 }

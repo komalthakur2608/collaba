@@ -4,6 +4,8 @@ import User from './user.model';
 import config from '../../config/environment';
 import jwt from 'jsonwebtoken';
 import Channel from '../../components/models/channel.model';
+import Team from '../../components/models/team.model';
+import Organisation from '../organisation/organisation.model';
 
 function validationError(res, statusCode) {
   statusCode = statusCode || 422;
@@ -60,8 +62,19 @@ export function create(req, res) {
 export function getUserInfo(req, res, next) {
   var userId = req.params.id;
   console.log("Id::" + userId);
-  return User.findOne({_id: userId})
-    .populate('organisation channels teams')
+  return User.findOne({_id: userId},'-salt -password')
+    .populate({
+     path:'organisation',
+     populate:{path:'public'}
+    })
+    .populate({
+      path: 'teams',
+      populate: {path: 'members.member channels'}
+     })
+    .populate({
+      path: 'channels',
+      populate: {path: 'team'}
+    })
     .exec()
     .then(user => { // don't ever give out the password or salt
       if (!user) {
@@ -75,7 +88,31 @@ export function getUserInfo(req, res, next) {
     .catch(err => next(err));
 }
 
-export function getChannelInfo(req, res, next) {
+//get public channels for the wall
+export function getPublicChannels(req,res,next){
+ var userId = req.params.id;
+ console.log("Id::" + userId);
+ return User.findOne({_id: userId},'-salt -password')
+   .populate('organisation')
+   .populate('teams')
+   .populate({
+     path:'channels',
+     match: { status:'public'},
+     populate:{path:'team'}
+   })
+   .exec()
+   .then(user => {
+     if (!user) {
+       console.log('user not found');
+       return res.status(401)
+         .end();
+     }
+     res.json(user);
+   })
+   .catch(err => next(err));
+}
+
+export function getChannelInfo(req, res) {
   var userId = req.params.id;
   var channelId = req.params.channelId;
   console.log("Id::" + userId);
@@ -112,7 +149,7 @@ export function saveMessage(req, res) {
       };
       channel.history.push(message);
       channel.save();
-      res.send("Data saved");
+      res.send("Success");
     });
 }
 
@@ -216,9 +253,80 @@ export function me(req, res, next) {
     .catch(err => next(err));
 }
 
+export function createPublicChannel(req, res, next){
+  var teamId = req.params.teamId;
+  var channelName = req.params.name;
+  console.log(teamId + " " + channelName);
+
+    var newChannel = new Channel({name : channelName, status : 'public', team : teamId, members : []});
+    Team.findById(teamId).exec()
+      .then(team =>{
+        team.channels.push(newChannel._id);
+        team.save().then(()=>{
+          Organisation.findById(team.organisation).exec()
+          .then(org =>{
+            org.public.push(newChannel._id);
+            org.save();
+            org.members.forEach(member =>{
+              User.findById(member).exec()
+                .then(user=> {
+                  user.channels.push(newChannel._id);
+                  user.save();
+                });
+            });
+            newChannel.members = org.members;
+            newChannel.save();
+          });
+        });
+        
+      })
+    res.json({result:'passed'});
+}
+
+//creating a private team by team admin
+export function createPrivateChannel(req, res) {
+  console.log(req.body);
+  var members = req.body.members;
+  var teamId = req.body.teamId;
+  var channelName = req.body.channelName;
+  var newChannel = new Channel({name : channelName, team : teamId , members : members});
+  newChannel.save();
+  Team.findById(teamId).exec()
+    .then(team=>{
+      team.channels.push(newChannel._id);
+      team.save();
+    });
+  members.forEach(member =>{
+    User.findById(member).exec()
+      .then(user=>{
+        user.channels.push(newChannel._id);
+        user.save();
+      });
+  });
+  res.send("done");
+}
+
 /**
  * Authentication callback
  */
 export function authCallback(req, res) {
   res.redirect('/');
+}
+
+
+export function getPublicChannelNames(req, res){
+  var teamId = req.params.teamId;
+  var channelName = [];
+  Team.findById(teamId).populate(
+  {   
+      path: 'organisation',
+      populate: {path: 'public'}
+  }).exec()
+    .then(team=>{
+      console.log(team);
+      team.organisation.public.forEach(channel=>{
+        channelName.push(channel.name);
+      })
+      res.json({channelNameArray : channelName})
+    }) 
 }

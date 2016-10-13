@@ -1,5 +1,6 @@
 @import '~bootstrap/dist/css/bootstrap.css';
 @import '~bootstrap-social/bootstrap-social.css';
+@import '~angular-ui-notification/dist/angular-ui-notification.css';
 /**
  * Bootstrap Fonts
  */
@@ -44,10 +45,14 @@
 
 /* Component styles are injected through gulp */
 /* inject:css */
+@import 'account/orgSignUp/orgSignUp.css';
+@import 'account/signupOrganisation/signupOrganisation.css';
 @import 'admin/admin.css';
+@import 'channel/channel.css';
 @import 'chat/chat.css';
 @import 'main/main.css';
 @import 'organisation/organisation.css';
+@import 'wall/wall.css';
 @import '../components/footer/footer.css';
 @import '../components/modal/modal.css';
 @import '../components/oauth-buttons/oauth-buttons.css';

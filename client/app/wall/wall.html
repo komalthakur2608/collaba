@@ -1,0 +1,33 @@
+<div class="container">
+  <div class="row">
+    <div class="col-sm-3 well">
+      <h3>Public Channels</h3>
+      <div ng-repeat="channel in wallCtrl.leftDiv">
+        <p  style="cursor:pointer" ng-click="wallCtrl.channelClick(channel)">{{channel.name}}</p>
+      </div>
+    </div>
+    <div class="col-sm-9" ng-repeat="channel in wallCtrl.rightDiv">
+      <div id="chat" class="well">
+        <div class="row">
+          <div class="col-xs-9">
+            <h2>{{channel.name}}</h2>
+          </div>
+          <div class="col-xs-3">
+            <button class="btn btn-default"ng-click="wallCtrl.closeWall(channel)">Close</button>
+          </div>
+        </div>
+        <i>(created by: {{channel.teamName}})</i>
+        <div class="input-group">
+          <input type="text" class="form-control" placeholder="Enter message" ng-model="wallCtrl.message[channel.id]" />
+          <span class="input-group-btn">
+          <button class="btn btn-default" type="button" ng-click="wallCtrl.sendMessage(channel)">Send</button>
+        </span>
+        </div>
+        <br/>
+        <ul ng-repeat='chat in wallCtrl.chatHistory[channel.id]' class="list-group">
+          <li class="list-group-item"><span class="well">{{chat.user}}</span>&nbsp;<span class="message"> {{chat.message}}</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>

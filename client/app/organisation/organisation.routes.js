@@ -9,6 +9,6 @@ export default function routes($stateProvider) {
     controller: 'OrgController',
     params: {org : null},
     controllerAs: 'org'/*,
-    authenticate: 'org'*/
+    authenticate: true*/
   });
 }

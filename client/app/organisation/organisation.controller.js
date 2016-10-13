@@ -43,14 +43,14 @@ export default class OrgController {
   }
 
   joinCurrentTeam(form, orgId, teamId){
-    console.log(this.joinTeamEmails);
+    console.log(this.joinTeamEmails[teamId]);
     console.log(orgId + "  " + teamId);
 
-    this.Organisation.sendRequests({}, {emails : this.joinTeamEmails, teamId : teamId, orgId :this.org_id}).$promise.then(res => {
+    this.Organisation.sendRequests({}, {emails : this.joinTeamEmails[teamId], teamId : teamId, orgId :this.org_id}).$promise.then(res => {
       console.log(res);
       if(res.result == 'done') {
         alert("request sent");
-        this.joinTeamEmails = '';
+        this.joinTeamEmails[teamId] = '';
       }     
     })
 

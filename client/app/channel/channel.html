@@ -1,0 +1,60 @@
+<script type="text/ng-template" id="customTemplate.html">
+  <a>
+    <span ng-bind-html="match.label | uibTypeaheadHighlight:query"></span>
+  </a>
+</script>
+
+
+
+<div class="container">
+  <div class="row">
+    <div class="col-sm-offset-2 col-sm-8 col-md-offset-2 col-md-8">
+      <h1>Create a channel</h1>
+    </div>
+  </div>
+  <div class="col-sm-offset-2 col-sm-8 col-md-offset-2 col-md-8">
+    <div><h3>Create private channel <input type="checkbox" ng-model="checked" aria-label="Toggle ngShow"></h3></div>
+    <div>
+      <!-- Show: -->
+      <div class="check-element animate-hide" ng-show="checked">
+        <div class = "well"> 
+          <h2>Private channel</h2>
+          <br>
+          <p class="form-group">
+            <label>Channel Name</label>
+            <input type="text" ng-model="channelCtrl.channelName" class="form-control">
+          </p>
+          <p class="form-group">
+            <label>Select Member</label>
+            <ul class="list-group" ng-repeat = "memberList in  channelCtrl.memberListObj">
+              <li class="list-group-item">{{memberList.email}}</li>
+            </ul>
+            <input type="text" ng-model="channelCtrl.customSelected" placeholder="Add members" uib-typeahead="m as m.email for m in channelCtrl.members | filter:{email:$viewValue}" typeahead-template-url="customTemplate.html" class="form-control" typeahead-show-hint="true" typeahead-min-length="0" >
+            <span><button class = "btn btn-primary" ng-click = 'channelCtrl.addMember(channelCtrl.customSelected)'>Add Member</button></span>
+          </p>
+          <button class="btn btn-lg btn-danger" ng-click = "channelCtrl.createPrivateChannel()">Create Channel</button>
+        </div>
+      </div>
+    </div>
+    <div>
+  <!-- Hide: -->
+  <div class="check-element animate-hide" ng-hide="checked">
+    <div class = "well"> 
+      <h2>Public channel</h2>
+      <br>
+      <form class="form" name="form" ng-submit="channelCtrl.createPublicChannel(form)" novalidate>
+        <div class="form-group">
+          <label>Channel Name</label>
+          <input type="text" name="name" class="form-control" ng-model="channelCtrl.publicChannel" required>
+        </div>
+        <div>
+          <button class="btn btn-inverse btn-lg btn-login" type="submit">
+            Create
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+</div>
+</div>

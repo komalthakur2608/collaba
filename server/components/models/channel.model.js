@@ -7,6 +7,10 @@ import Team from './team.model';
 
 var ChannelSchema = new Schema({
   name: String,
+  status: {
+    type: String,
+    default: 'private'
+  },
   team: {
     type: Schema.Types.ObjectId,
     ref: 'Team'

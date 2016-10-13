@@ -20,7 +20,7 @@ export function authInterceptor($rootScope, $q, $cookies, $injector, Util) {
         (state || (state = $injector.get('$state')))
         .go('login');
         // remove any stale tokens
-        // $cookies.remove('token');
+        $cookies.remove('token');
       }
       return $q.reject(response);
     }
