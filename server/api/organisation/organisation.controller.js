@@ -11,10 +11,14 @@
 'use strict';
 
 import nodemailer from 'nodemailer';
+import shortid from 'shortid';
 import config from '../../config/environment';
 import jwt from 'jsonwebtoken';
 import jsonpatch from 'fast-json-patch';
 import Organisation from './organisation.model';
+import Team from '../../components/models/team.model';
+import Channel from '../../components/models/channel.model';
+
 
 
 //TODO: Use XOauth 2.0 in nodemailer
@@ -39,8 +43,24 @@ function sendMail(to, subject, body) {
       console.log('Message sent');
     }
   });
+}
+
+function sendMailToJoin(to, teamId, orgId) {
+  transporter.sendMail({
+    from: config.email,
+    to: to,
+    subject: 'invitation to join team',
+    html: 'http://localhost:3000/signup/' + to + "/" + teamId
+  }, function (error, info) {
+    if (error) {
+      console.log('-------------' + error + '------------');
+    } else {
+      console.log('Message sent');
+    }
+  });
 
 }
+
 
 function validationError(res, statusCode) {
   statusCode = statusCode || 422;
@@ -144,10 +164,11 @@ export function show(req, res) {
 export function create(req, res) {
   var newOrganisation = new Organisation(req.body);
   newOrganisation.status = 'pending';
-  Organisation.find(req.body.email)
+  // newOrganisation.password = 'abcdef';
+  console.log(newOrganisation);
   newOrganisation.save()
     .then(function (user) {
-      res.send('user')
+      res.send('user');
     })
     .catch(validationError(res));
 }
@@ -157,6 +178,10 @@ export function updateStatus(req, res) {
     .exec()
     .then(organisation => {
       organisation.status = req.body.status;
+      if (req.body.status == 'approved') {
+        var password = shortid.generate();
+        organisation.password = password;
+      }
 
       return organisation.save()
         .then(() => {
@@ -165,7 +190,8 @@ export function updateStatus(req, res) {
             sendMail(organisation.email, 'Request rejected', 'Sorry, Your request has been rejected');
             break;
           case 'approved':
-            sendMail(organisation.email, 'Request approved', 'Congrulations, Your request has been approved');
+            console.log('Request approved', '<h1>Congrulations!!</h1> Your request has been approved.<br/>You can login using these credentials:<br/><b>Username:</b> ' + organisation.email + '<br/><b>Password:</b> ' + password);
+            sendMail(organisation.email, 'Request approved', '<h1>Congrulations!!</h1> Your request has been approved.<br/>You can login using these credentials:<br/><b>Username:</b> ' + organisation.email + '<br/><b>Password:</b> ' + password);
             break;
           case 'on hold':
             sendMail(organisation.email, 'Request has been put on hold', 'Your request have been put on hold and you shall be intimidated within 1 week.<br/> Thanks.')
@@ -175,6 +201,184 @@ export function updateStatus(req, res) {
             .end();
         })
         .catch(validationError(res));
+    })
+}
+
+//get current organisation
+export function me(req, res, next) {
+  console.log("organisation request : " + req)
+  var orgId = req.org.id;
+
+  return Organisation.findOne({
+      _id: orgId
+    }, '-salt -password')
+    .exec()
+    .then(org => { // don't ever give out the password or salt
+      if (!org) {
+        return res.status(401)
+          .end();
+      }
+      console.log('server org  : ' + org);
+      res.json(org);
+    })
+    .catch(err => next(err));
+}
+
+//change password
+export function changePassword(req, res) {
+  var userId = req.user._id;
+  var oldPass = String(req.body.oldPassword);
+  var newPass = String(req.body.newPassword);
+
+  return Organisation.findById(userId)
+    .exec()
+    .then(user => {
+      if (user.authenticate(oldPass)) {
+        user.password = newPass;
+        return user.save()
+          .then(() => {
+            res.status(204)
+              .end();
+          })
+          .catch(validationError(res));
+      } else {
+        return res.status(403)
+          .end();
+      }
+    });
+}
+
+//get all the details of the current organisation
+export function getDetails(req, res, next) {
+  var userId = req.params.id;
+
+  return Organisation.findOne({
+      _id: userId
+    }, '-salt -password')
+    .populate('members')
+    .populate({
+      path: 'teams',
+      populate: {
+        path: 'members.member'
+      }
+    })
+    .exec()
+    .then(user => { // don't ever give out the password or salt
+      if (!user) {
+        return res.status(401)
+          .end();
+      } else {
+        console.log(JSON.stringify(user));
+        res.json(user);
+      }
+    })
+    .catch(err => next(err));
+}
+
+export function sendmails(req, res) {
+  var emails = String(req.body.emails);
+  var teamName = String(req.body.team);
+  var orgId = String(req.body.orgId);
+  var teamId = String(req.body.teamId);
+  console.log("orgID : " + orgId + " emails : " + emails + " teamName : " + teamName + " team ID : " + teamId);
+  if (teamName != 'undefined') {
+    Team.findOne({
+        name: teamName,
+        organisation: orgId
+      })
+      .exec()
+      .then(doc => {
+        if (!doc) {
+          var newChannel = new Channel({
+            name: 'general'
+          });
+          var newTeam = new Team({
+            name: teamName,
+            organisation: orgId,
+            general: newChannel._id
+          });
+          newChannel.team=newTeam._id;
+          newTeam.channels.push(newChannel._id);
+          newChannel.save();
+          newTeam.save();
+          Organisation.findById(orgId)
+            .exec()
+            .then(organisation => {
+              organisation.teams.push(newTeam._id);
+              organisation.save()
+                .then(() => {
+                  emails.split(',')
+                    .forEach(email => {
+                      sendMailToJoin(email.trim(), newTeam._id);
+                    });
+                });
+
+            });
+          // newChannel.save()
+          //   .then(channel => {
+          //     newTeam.channels.push(channel._id);
+          //     newTeam.save()
+          //       .then(doc => {
+          //         Channel.findById(channel._id)
+          //           .exec()
+          //           .
+          //         then(channelDoc => {
+          //           channelDoc.team = doc._id;
+          //           channelDoc.save()
+          //             .then(function () {
+          //               Organisation.findById(orgId, function (err, org) {
+          //                 if (err) return handleError(err);
+          //
+          //                 org.teams.push(doc.id);
+          //                 org.save()
+          //                   .
+          //                 then(orgDoc => {
+          //                   var emailArray = emails.split(',');
+          //                   emailArray.forEach(function (email) {
+          //                     sendMailToJoin(email.trim(), doc.id);
+          //                   })
+          //                 });
+          //               });
+          //             })
+          //         })
+          //
+          //       })
+          //
+          //   })
+          res.json({
+            result: 'done'
+          });
+        } else {
+          res.send('failed');
+        }
+      })
+  }
+  if (teamId != 'undefined') {
+    console.log("sending request to join current team");
+    var emailArray = emails.split(',');
+    emailArray.forEach(function (email) {
+      sendMailToJoin(email.trim(), teamId);
+    })
+    res.json({
+      result: 'done'
+    });
+  }
+
+}
+
+export function makeAdmin(req, res) {
+  var teamId = String(req.body.teamId);
+  var teamMemberId = String(req.body.teamMemberId);
+  Team.findById(teamId)
+    .exec()
+    .then(team => {
+      team.members.forEach(function (member) {
+        if (member._id == teamMemberId) {
+          member.role = "team_admin";
+        }
+      })
+      team.save();
+      res.send('done');
     })
 }
 

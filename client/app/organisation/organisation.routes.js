@@ -7,8 +7,7 @@ export default function routes($stateProvider) {
     url: '/organisation',
     template: require('./organisation.html'),
     controller: 'OrgController',
-    params: {org : null},
-    controllerAs: 'org'/*,
-    authenticate: true*/
+    controllerAs: 'org',
+    authenticate: false
   });
 }

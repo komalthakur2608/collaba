@@ -138,6 +138,7 @@ var niit = new Organisation({
   about: 'about',
   address: 'address',
   phone: 'phone',
+  domainName: 'NIIT-tech.com',
   status: 'approved'
 });
 
@@ -149,6 +150,7 @@ var collaba = new Organisation({
   about: 'about',
   address: 'address',
   phone: 'phone',
+  domainName: 'collaba.com',
   status: 'approved'
 });
 

@@ -8,11 +8,27 @@ class _User {
   $promise = undefined;
 }
 
+class _Org {
+  _id = '';
+  name = '';
+  email = '';
+  website = '';
+  domainName = '';
+  about = '';
+  address = '';
+  phone = '';
+  members = [];
+  teams = [];
+  status = '';
+  $promise = undefined;
+}
+
 export function AuthService($location, $http, $cookies, $q, appConfig, Util, User, Organisation) {
   'ngInject';
 
   var safeCb = Util.safeCb;
   var currentUser = new _User();
+  var currentOrg = new _Org();
   var userRoles = appConfig.userRoles || [];
   /**
    * Check if userRole is >= role
@@ -60,11 +76,62 @@ export function AuthService($location, $http, $cookies, $q, appConfig, Util, Use
     },
 
     /**
+     * Authenticate organisation and save token
+     *
+     * @param  {Object}   organisation     - login info
+     * @param  {Function} callback - function(error, organisation)
+     * @return {Promise}
+     */
+    loginOrganisation({
+      email,
+      password
+    }, callback) {
+      return $http.post('/auth/local/organisation', {
+          email,
+          password
+        })
+        .then(res => {
+          $cookies.put('token', res.data.token);
+          return Organisation.get({
+              id: res.data.org._id
+            })
+            .$promise.then(org => {
+              currentOrg = org;
+              console.log(currentOrg);
+              return currentOrg;
+            });
+
+        })
+        .then(user => {
+          console.log(currentOrg);
+          console.log(user);
+          safeCb(callback)(null, user);
+          return user;
+        })
+        .catch(err => {
+          console.log('err occured');
+          console.log(err);
+          Auth.logoutOrganisation();
+          safeCb(callback)(err.data);
+          return $q.reject(err.data);
+        });
+    },
+
+    /**
      * Delete access token and user info
      */
     logout() {
       $cookies.remove('token');
       currentUser = new _User();
+    },
+
+    /**
+     * Delete access token and organisation info
+     */
+    logoutOrganisation() {
+      console.log("organisation logout called");
+      $cookies.remove('token');
+      currentOrg = new _Org();
     },
 
     /**
@@ -89,7 +156,7 @@ export function AuthService($location, $http, $cookies, $q, appConfig, Util, Use
     /**
      * Create a new organisation
      *
-     * @param  {Object}   user     - organisation info
+     * @param  {Object}   organisation     - organisation info
      * @param  {Function} callback - function(error, organisation)
      * @return {Promise}
      */
@@ -125,6 +192,28 @@ export function AuthService($location, $http, $cookies, $q, appConfig, Util, Use
     },
 
     /**
+     * Change password
+     *
+     * @param  {String}   oldPassword
+     * @param  {String}   newPassword
+     * @param  {Function} callback    - function(error, organisation)
+     * @return {Promise}
+     */
+    changePasswordOrg(oldPassword, newPassword, callback) {
+      return Organisation.changePassword({
+          id: currentOrg._id
+        }, {
+          oldPassword,
+          newPassword
+        }, function () {
+          return safeCb(callback)(null);
+        }, function (err) {
+          return safeCb(callback)(err);
+        })
+        .$promise;
+    },
+
+    /**
      * Gets all available info on a user
      *
      * @param  {Function} [callback] - function(user)
@@ -144,12 +233,40 @@ export function AuthService($location, $http, $cookies, $q, appConfig, Util, Use
     },
 
     /**
+     * Gets all available info on a organisation
+     *
+     * @param  {Function} [callback] - function(organisation)
+     * @return {Promise}
+     */
+    getCurrentOrg(callback) {
+      var value = _.get(currentOrg, '$promise') ? currentOrg.$promise : currentOrg;
+
+      return $q.when(value)
+        .then(organisation => {
+          safeCb(callback)(organisation);
+          return organisation;
+        }, () => {
+          safeCb(callback)({});
+          return {};
+        });
+    },
+
+    /**
      * Gets all available info on a user
      *
      * @return {Object}
      */
     getCurrentUserSync() {
       return currentUser;
+    },
+
+    /**
+     * Gets all available info on a organisation
+     *
+     * @return {Object}
+     */
+    getCurrentOrgSync() {
+      return currentOrg;
     },
 
     /**
@@ -169,12 +286,37 @@ export function AuthService($location, $http, $cookies, $q, appConfig, Util, Use
     },
 
     /**
+     * Check if a organisation is logged in
+     *
+     * @param  {Function} [callback] - function(is)
+     * @return {Promise}
+     */
+    isLoggedInOrg(callback) {
+      return Auth.getCurrentOrg(undefined)
+        .then(organisation => {
+          let is = _.get(organisation, 'name');
+
+          safeCb(callback)(is);
+          return is;
+        });
+    },
+
+    /**
      * Check if a user is logged in
      *
      * @return {Bool}
      */
     isLoggedInSync() {
       return !!_.get(currentUser, 'role');
+    },
+
+    /**
+     * Check if an organisation is logged in
+     *
+     * @return {Bool}
+     */
+    isLoggedInOrgSync() {
+      return !!_.get(currentOrg, 'name');
     },
 
     /**

@@ -1,5 +1,5 @@
 export default class OrgController {
-  
+
   members = [];
   teams = [];
   details = {};
@@ -8,12 +8,13 @@ export default class OrgController {
   isEmployeeCollapsed = false;
   isTeamCollapsed = false;
   isTeamDetailCollapsed = false;
-  constructor($stateParams, Organisation) {
+  constructor(Auth, $stateParams, Organisation) {
     'ngInject';
+    this.Auth=Auth;
     this.details;
     this.Organisation = Organisation;
-    this.org_id = $stateParams.org._id;
-    this.getDetails($stateParams.org._id); 
+    this.org_id = this.Auth.getCurrentOrgSync()._id;
+    this.getDetails(this.org_id);
   }
 
   getDetails(id) {
@@ -21,7 +22,7 @@ export default class OrgController {
       this.details=data;
       this.members = this.details.members;
       this.teams = this.details.teams;
-    })    
+    });
   }
 
   sendRequest(form){
@@ -29,7 +30,7 @@ export default class OrgController {
     this.Organisation.sendRequests({}, {emails : this.emails, team : this.team, orgId :this.org_id}).$promise.then(res => {
       console.log(res);
       if(res.result == 'done') {
-        this.getDetails(this.org_id); 
+        this.getDetails(this.org_id);
         this.sent_request = "invites sent";
         this.emails = '';
         this.team = '';
@@ -37,21 +38,21 @@ export default class OrgController {
       else {
           this.sent_request = " team name should be unique";
       }
-     
+
     })
 
   }
 
   joinCurrentTeam(form, orgId, teamId){
-    console.log(this.joinTeamEmails[teamId]);
+    console.log(this.joinTeamEmails);
     console.log(orgId + "  " + teamId);
 
-    this.Organisation.sendRequests({}, {emails : this.joinTeamEmails[teamId], teamId : teamId, orgId :this.org_id}).$promise.then(res => {
+    this.Organisation.sendRequests({}, {emails : this.joinTeamEmails, teamId : teamId, orgId :this.org_id}).$promise.then(res => {
       console.log(res);
       if(res.result == 'done') {
         alert("request sent");
-        this.joinTeamEmails[teamId] = '';
-      }     
+        this.joinTeamEmails = '';
+      }
     })
 
   }
@@ -67,7 +68,7 @@ export default class OrgController {
     console.log("team id "+teamId);
     console.log("team member id "+teamMemberId);
     this.Organisation.makeAdmin({}, { teamId : teamId, teamMemberId :teamMemberId}).$promise.then(res =>{
-      this.getDetails(this.org_id); 
+      this.getDetails(this.org_id);
     })
   }
 }

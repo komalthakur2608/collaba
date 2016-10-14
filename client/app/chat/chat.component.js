@@ -12,8 +12,9 @@ export class ChatComponent {
   userName = '';          //store name of user
   teamChannels = {};      // To store channel for each team
   publicChannels=[];      //To store channel whose status is public
+  channels = [];          //to store all channel ids
   /*@ngInject*/
-  constructor(socket, $http, Auth, Notification) {
+  constructor(socket, $http, $scope, Auth, Notification) {
     this.socket = socket;  //This service is used to emit and receive socket
     this.Auth = Auth;      //This serevice contain auth related functions
     this.$http = $http;    //This service is used to send and retrieve data from server
@@ -61,9 +62,10 @@ export class ChatComponent {
             //if teamId in teams equal to public.team
             if(response.data.teams[i]._id==response.data.organisation.public[j].team){
               this.publicChannels.push(response.data.organisation.public[j]);
-              //Join room for each channelId
-              this.socket.room(response.data.organisation.public[j]._id);
             }
+            this.channels.push(response.data.organisation.public[j]._id);
+            //Join room for each channelId
+            this.socket.room(response.data.organisation.public[j]._id);
           }
         }
         console.log(JSON.stringify(this.teams));
@@ -72,6 +74,7 @@ export class ChatComponent {
         for (var i = 0; i < response.data.channels.length; i++) {
           if(response.data.channels[i].status=="private"){
             this.teamChannels[response.data.channels[i].team._id].push(response.data.channels[i]);
+            this.channels.push(response.data.channels[i]._id);
             //Join room for each channelId
             this.socket.room(response.data.channels[i]._id);
           }
@@ -115,6 +118,13 @@ export class ChatComponent {
         }
 
       });
+    });
+  }
+
+  $onDestroy() {
+    this.channels.forEach(channel =>{
+      this.socket.leaveRoom(channel);
+      alert("leaving channels : " + channel);
     });
   }
 

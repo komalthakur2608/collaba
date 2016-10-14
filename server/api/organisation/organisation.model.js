@@ -1,10 +1,13 @@
 'use strict';
 import crypto from 'crypto';
 mongoose.Promise = require('bluebird');
-import mongoose, {Schema} from 'mongoose';
+import mongoose, {
+  Schema
+} from 'mongoose';
 import User from '../user/user.model';
 import Team from '../../components/models/team.model';
 import Channel from '../../components/models/channel.model';
+
 var OrganisationSchema = new mongoose.Schema({
   name: String,
   email: {
@@ -43,7 +46,7 @@ var OrganisationSchema = new mongoose.Schema({
 // Public profile information
 OrganisationSchema
   .virtual('profile')
-  .get(function() {
+  .get(function () {
     return {
       name: this.name,
       email: this.email,
@@ -57,7 +60,7 @@ OrganisationSchema
 // Non-sensitive info we'll be putting in the token
 OrganisationSchema
   .virtual('token')
-  .get(function() {
+  .get(function () {
     return {
       _id: this._id,
       name: this.name
@@ -71,25 +74,18 @@ OrganisationSchema
 // Validate empty email
 OrganisationSchema
   .path('email')
-  .validate(function(email) {
+  .validate(function (email) {
     return email.length;
   }, 'Email cannot be blank');
-
-// Validate empty password
-OrganisationSchema
-  .path('password')
-  .validate(function(password) {
-    return password.length;
-  }, 'Password cannot be blank');
-
 
 // Validate email is not taken
 OrganisationSchema
   .path('email')
-  .validate(function(value, respond) {
+  .validate(function (value, respond) {
     return this.constructor.findOne({
         email: value
-      }).exec()
+      })
+      .exec()
       .then(organisation => {
         if (organisation) {
           if (this.id === organisation.id) {
@@ -99,20 +95,47 @@ OrganisationSchema
         }
         return respond(true);
       })
-      .catch(function(err) {
+      .catch(function (err) {
         throw err;
       });
   }, 'The specified email address is already in use.');
 
-var validatePresenceOf = function(value) {
+var validatePresenceOf = function (value) {
   return value && value.length;
 };
+
+//Validate domain is not taken
+OrganisationSchema
+  .path('domainName')
+  .validate(function (value, respond) {
+    return this.constructor.findOne({
+        domainName: value
+      })
+      .exec()
+      .then(organisation => {
+        if (organisation) {
+          if (this.id === organisation.id) {
+            return respond(true);
+          }
+          return respond(false);
+        }
+        return respond(true);
+      })
+      .catch(function (err) {
+        throw err;
+      });
+  }, 'The specified domain is already in use.');
+
+var validatePresenceOf = function (value) {
+  return value && value.length;
+};
+
 
 /**
  * Pre-save hook
  */
 OrganisationSchema
-  .pre('save', function(next) {
+  .pre('save', function (next) {
     // Handle new/update passwords
     if (!this.isModified('password')) {
       return next();

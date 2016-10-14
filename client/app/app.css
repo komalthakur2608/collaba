@@ -45,7 +45,6 @@
 
 /* Component styles are injected through gulp */
 /* inject:css */
-@import 'account/orgSignUp/orgSignUp.css';
 @import 'account/signupOrganisation/signupOrganisation.css';
 @import 'admin/admin.css';
 @import 'channel/channel.css';

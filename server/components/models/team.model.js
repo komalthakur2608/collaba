@@ -17,7 +17,7 @@ var TeamSchema = new Schema({
   },
   general: {
     type: Schema.Types.ObjectId,
-    ref: 'Channel'
+    ref: 'channel'
   },
   members: [{
     member: {

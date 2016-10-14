@@ -8,6 +8,10 @@ import * as auth from '../../auth/auth.service';
 
 var router = new Router();
 
+router.post('/uploads', controller.uploadFile);
+//to controller findorg
+router.post('/findOrg', controller.findOrg);
+//to controller for searching whether already registered or not
 router.post('/alreadyUser', controller.alreadyUser);
 router.get('/getUserInfo/:id', controller.getUserInfo);
 router.get('/getChannelInfo/:id/:channelId', controller.getChannelInfo);

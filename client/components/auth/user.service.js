@@ -23,6 +23,12 @@ export function UserResource($resource) {
       params: {
         controller: 'alreadyUser'
       }
+    },
+    findOrg: {
+      method: 'POST',
+      params: {
+        controller: 'findOrg'
+      }
     }
   });
 }

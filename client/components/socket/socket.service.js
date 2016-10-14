@@ -28,13 +28,17 @@ function Socket(socketFactory) {
     sendMessage(data){
       socket.emit('channel-message',data);
     },
-   syncUpdatesChats(cb){
+    syncUpdatesChats(cb){
       socket.on('channel-message',function(data){
         console.log("Get info:"+data);
         cb(data);
       })
 
 
+  },
+
+  leaveRoom(channelId) {
+    socket.emit('leaveRoom', channelId);
   },
     /**
      * Register listeners to sync an array with updates on a model

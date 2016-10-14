@@ -12,6 +12,7 @@ export class WallComponent {
   leftDiv=[];
   rightDiv=[];
   totalWalls=4;
+  channels = [];
   /*@ngInject*/
   constructor(socket, $http, Auth, Notification) {
     this.socket = socket;  //This service is used to emit and receive socket
@@ -52,11 +53,20 @@ export class WallComponent {
           }
 
           //Join room for each channelId
-          this.socket.room(response.data.channels[i]._id);
+          //this.socket.room(response.data.channels[i]._id);
 
         }
         console.log("rightDiv:"+JSON.stringify(this.rightDiv));
         console.log("leftDiv:"+JSON.stringify(this.leftDiv));
+      });
+
+      this.$http.get('/api/users/getUserInfo/' + this.id)
+      .then(response => {
+        for (var i = 0; i < response.data.channels.length; i++) {
+          this.channels.push(response.data.channels[i]._id);
+          //Join room for each channelId
+          this.socket.room(response.data.channels[i]._id);
+        }
       });
     });
 
@@ -66,6 +76,14 @@ export class WallComponent {
           user: data.user,
           message: data.message
         });
+      this.Notification.primary('New Message on channel '+data.channelName);
+    });
+  }
+
+  $onDestroy() {
+    this.channels.forEach(channel =>{
+      this.socket.leaveRoom(channel);
+      alert("leaving channels : " + channel);
     });
   }
 
